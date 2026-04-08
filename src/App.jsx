@@ -14,13 +14,13 @@ import AuthPage from "./pages/Auth";
 export default function App() {
   const { role, loading, user } = useAuth();
   const [active, setActive] = useState("home");
+  const [sidebarOpen, setSidebarOpen] = useState(false);
 
   if (loading) return null;
 
   const isAdmin = role === "admin";
-
-  // 🔥 Si admin non connecté → page Auth
   const adminPages = ["contributions", "transactions"];
+
   if (!user && adminPages.includes(active)) {
     return <AuthPage onLogin={() => setActive("home")} />;
   }
@@ -41,15 +41,32 @@ export default function App() {
   };
 
   return (
-    <div className="flex min-h-screen bg-[#0A0F1F] text-white">
+    <div className="min-h-screen bg-[#0A0F1F] text-white flex">
 
-      <Sidebar active={active} setActive={setActive} />
+      {/* SIDEBAR RESPONSIVE */}
+      <Sidebar
+        active={active}
+        setActive={setActive}
+        sidebarOpen={sidebarOpen}
+        setSidebarOpen={setSidebarOpen}
+      />
 
-      <main className="flex-1 flex flex-col">
+      {/* CONTENU PRINCIPAL */}
+      <div className="flex-1 flex flex-col">
 
-        {/* HEADER */}
-        <header className="backdrop-blur bg-white/70 dark:bg-slate-900/60 border-b border-slate-200 dark:border-slate-700 px-8 py-4 flex items-center justify-between">
+        {/* HEADER MOBILE */}
+        <header className="md:hidden flex items-center justify-between px-4 py-3 border-b border-slate-800 bg-[#0A0F1F] sticky top-0 z-30">
+          <button onClick={() => setSidebarOpen(true)} className="text-xl">
+            ☰
+          </button>
+          <h1 className="text-sm font-semibold">
+            {active.charAt(0).toUpperCase() + active.slice(1)}
+          </h1>
+          <div className="w-6" />
+        </header>
 
+        {/* HEADER DESKTOP */}
+        <header className="hidden md:flex backdrop-blur bg-white/10 border-b border-slate-700 px-8 py-4 items-center justify-between">
           <div className="flex items-center gap-3">
             <div>
               <h2 className="text-lg font-semibold">
@@ -60,7 +77,6 @@ export default function App() {
               </p>
             </div>
 
-            {/* BADGE ADMIN */}
             {isAdmin && (
               <span className="px-3 py-1 text-xs font-semibold bg-blue-700 text-white rounded-full">
                 ADMIN
@@ -68,7 +84,6 @@ export default function App() {
             )}
           </div>
 
-          {/* BOUTON DECONNEXION */}
           {isAdmin && (
             <button
               onClick={async () => {
@@ -82,11 +97,12 @@ export default function App() {
           )}
         </header>
 
-        <section className="p-8 flex-1">
+        {/* CONTENU */}
+        <main className="px-4 md:px-8 lg:px-10 py-6 flex-1">
           {renderPage()}
-        </section>
+        </main>
 
-      </main>
+      </div>
     </div>
   );
 }

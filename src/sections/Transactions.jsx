@@ -58,12 +58,15 @@ export default function Transactions() {
     }
 
     if (editingId) {
-      await supabase.from("transactions").update({
-        type,
-        amount: Number(amount),
-        reason: finalReason,
-        date,
-      }).eq("id", editingId);
+      await supabase
+        .from("transactions")
+        .update({
+          type,
+          amount: Number(amount),
+          reason: finalReason,
+          date,
+        })
+        .eq("id", editingId);
     } else {
       await supabase.from("transactions").insert([
         {
@@ -102,10 +105,10 @@ export default function Transactions() {
   return (
     <div className="space-y-10 text-white">
 
-      <h1 className="text-3xl font-semibold">Transactions</h1>
+      <h1 className="text-2xl md:text-3xl font-semibold">Transactions</h1>
 
       {/* Formulaire */}
-      <div className="bg-[#111827] p-6 rounded-xl border border-slate-700">
+      <div className="bg-[#111827] p-4 md:p-6 rounded-xl border border-slate-700">
 
         <h2 className="text-lg font-semibold mb-4">
           {editingId ? "Modifier la transaction" : "Ajouter une transaction"}
@@ -116,7 +119,7 @@ export default function Transactions() {
           <select
             value={type}
             onChange={(e) => setType(e.target.value)}
-            className="select select-bordered bg-slate-800 border-slate-600 text-white"
+            className="select select-bordered bg-slate-800 border-slate-600 text-white w-full"
           >
             <option value="Entrée">Entrée</option>
             <option value="Sortie">Sortie</option>
@@ -127,7 +130,7 @@ export default function Transactions() {
             placeholder="Montant"
             value={amount}
             onChange={(e) => setAmount(e.target.value)}
-            className="input input-bordered bg-slate-800 border-slate-600 text-white"
+            className="input input-bordered bg-slate-800 border-slate-600 text-white w-full"
           />
 
           <div>
@@ -149,7 +152,7 @@ export default function Transactions() {
                 placeholder="Motif personnalisé"
                 value={customReason}
                 onChange={(e) => setCustomReason(e.target.value)}
-                className="input input-bordered bg-slate-800 border-slate-600 text-white mt-2"
+                className="input input-bordered bg-slate-800 border-slate-600 text-white w-full mt-2"
               />
             )}
           </div>
@@ -158,12 +161,12 @@ export default function Transactions() {
             type="date"
             value={date}
             onChange={(e) => setDate(e.target.value)}
-            className="input input-bordered bg-slate-800 border-slate-600 text-white"
+            className="input input-bordered bg-slate-800 border-slate-600 text-white w-full"
           />
 
         </div>
 
-        <div className="mt-4 flex gap-3">
+        <div className="mt-4 flex flex-wrap gap-3">
           <button
             onClick={addOrUpdateTransaction}
             className="px-5 py-2 rounded-lg bg-blue-600 hover:bg-blue-700 transition shadow"
@@ -183,7 +186,7 @@ export default function Transactions() {
       </div>
 
       {/* LISTE REGROUPÉE PAR MOIS */}
-      <div className="bg-[#111827] p-6 rounded-xl border border-slate-700">
+      <div className="bg-[#111827] p-4 md:p-6 rounded-xl border border-slate-700">
 
         <h2 className="text-lg font-semibold mb-4">Historique par mois</h2>
 
@@ -207,28 +210,31 @@ export default function Transactions() {
             </button>
 
             {selectedMonth === m.month_key && (
-              <div className="mt-3 ml-4 bg-slate-900 p-4 rounded-lg border border-slate-700">
+              <div className="mt-3 ml-2 md:ml-4 bg-slate-900 p-4 rounded-lg border border-slate-700">
 
-                <ul className="space-y-2">
+                <ul className="space-y-3">
                   {transactions.map((t) => (
-                    <li key={t.id} className="flex justify-between items-center text-slate-300">
+                    <li
+                      key={t.id}
+                      className="flex flex-col md:flex-row md:justify-between md:items-center text-slate-300 bg-slate-800 p-3 rounded-lg border border-slate-700"
+                    >
 
-                      <span>
-                        • {t.type} — {t.amount} GNF  
+                      <div className="text-sm">
+                        <span className="font-semibold">{t.type}</span> — {t.amount} GNF  
                         <span className="text-blue-400 ml-2">({t.reason})</span>
-                      </span>
+                      </div>
 
-                      <div className="flex gap-2">
+                      <div className="flex gap-2 mt-2 md:mt-0">
                         <button
                           onClick={() => startEdit(t)}
-                          className="px-2 py-1 text-xs bg-yellow-600 hover:bg-yellow-700 rounded"
+                          className="px-3 py-1 text-xs bg-yellow-600 hover:bg-yellow-700 rounded"
                         >
                           Modifier
                         </button>
 
                         <button
                           onClick={() => deleteTransaction(t.id)}
-                          className="px-2 py-1 text-xs bg-red-600 hover:bg-red-700 rounded"
+                          className="px-3 py-1 text-xs bg-red-600 hover:bg-red-700 rounded"
                         >
                           Supprimer
                         </button>

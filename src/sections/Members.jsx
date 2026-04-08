@@ -101,11 +101,11 @@ export default function Members() {
   return (
     <div className="space-y-10 text-white">
 
-      <h1 className="text-3xl font-semibold">Gestion des membres</h1>
+      <h1 className="text-2xl md:text-3xl font-semibold">Gestion des membres</h1>
 
       {/* Formulaire visible uniquement pour les admins */}
       {isAdmin && (
-        <div className="bg-[#111827] p-6 rounded-xl border border-slate-700">
+        <div className="bg-[#111827] p-4 md:p-6 rounded-xl border border-slate-700">
 
           <h2 className="text-lg font-semibold mb-4">
             {editingId ? "Modifier un membre" : "Ajouter un membre"}
@@ -118,7 +118,7 @@ export default function Members() {
               placeholder="Nom complet"
               value={name}
               onChange={(e) => setName(e.target.value)}
-              className="input input-bordered bg-slate-800 border-slate-600 text-white"
+              className="input input-bordered bg-slate-800 border-slate-600 text-white w-full"
             />
 
             <input
@@ -126,13 +126,13 @@ export default function Members() {
               placeholder="Téléphone"
               value={phone}
               onChange={(e) => setPhone(e.target.value)}
-              className="input input-bordered bg-slate-800 border-slate-600 text-white"
+              className="input input-bordered bg-slate-800 border-slate-600 text-white w-full"
             />
 
             <select
               value={memberRole}
               onChange={(e) => setMemberRole(e.target.value)}
-              className="select select-bordered bg-slate-800 border-slate-600 text-white"
+              className="select select-bordered bg-slate-800 border-slate-600 text-white w-full"
             >
               <option value="">Choisir un rôle</option>
               <option value="Président">Président</option>
@@ -149,7 +149,7 @@ export default function Members() {
               placeholder="Lien de parenté"
               value={lienParente}
               onChange={(e) => setLienParente(e.target.value)}
-              className="input input-bordered bg-slate-800 border-slate-600 text-white"
+              className="input input-bordered bg-slate-800 border-slate-600 text-white w-full"
             />
 
             <input
@@ -157,12 +157,12 @@ export default function Members() {
               placeholder="Date anniversaire"
               value={dateAnniversaire}
               onChange={(e) => setDateAnniversaire(e.target.value)}
-              className="input input-bordered bg-slate-800 border-slate-600 text-white"
+              className="input input-bordered bg-slate-800 border-slate-600 text-white w-full"
             />
 
           </div>
 
-          <div className="mt-4 flex gap-3">
+          <div className="mt-4 flex flex-wrap gap-3">
             <button
               onClick={saveMember}
               className="px-5 py-2 rounded-lg bg-blue-600 hover:bg-blue-700 transition shadow"
@@ -183,63 +183,65 @@ export default function Members() {
         </div>
       )}
 
-      {/* Tableau */}
-      <div className="bg-[#111827] p-6 rounded-xl border border-slate-700">
+      {/* Tableau responsive */}
+      <div className="bg-[#111827] p-4 md:p-6 rounded-xl border border-slate-700">
 
         <h2 className="text-lg font-semibold mb-4">Liste des membres</h2>
 
-        <table className="w-full text-left">
-          <thead>
-            <tr className="border-b border-slate-700">
-              <th className="py-3 px-2 text-slate-400">Nom</th>
-              <th className="py-3 px-2 text-slate-400">Parenté</th>
-              <th className="py-3 px-2 text-slate-400">Téléphone</th>
-              <th className="py-3 px-2 text-slate-400">Rôle</th>
-              <th className="py-3 px-2 text-slate-400">Anniversaire</th>
-              <th className="py-3 px-2 text-slate-400">Actions</th>
-            </tr>
-          </thead>
-
-          <tbody>
-            {members.map((m) => (
-              <tr key={m.id} className="border-b border-slate-700">
-
-                <td className="py-3 px-2">{m.name}</td>
-                <td className="py-3 px-2">{m.lien_parente || "-"}</td>
-                <td className="py-3 px-2">{m.phone}</td>
-                <td className="py-3 px-2">{displayRole(m.role)}</td>
-
-                <td className="py-3 px-2">
-                  {m.date_anniversaire
-                    ? new Date(m.date_anniversaire).toLocaleDateString("fr-FR")
-                    : "-"}
-                </td>
-
-                <td className="py-3 px-2 flex gap-2">
-                  {isAdmin && (
-                    <>
-                      <button
-                        onClick={() => startEdit(m)}
-                        className="px-2 py-1 text-xs bg-yellow-600 hover:bg-yellow-700 rounded"
-                      >
-                        Modifier
-                      </button>
-
-                      <button
-                        onClick={() => deleteMember(m.id)}
-                        className="px-2 py-1 text-xs bg-red-600 hover:bg-red-700 rounded"
-                      >
-                        Supprimer
-                      </button>
-                    </>
-                  )}
-                </td>
-
+        <div className="overflow-x-auto">
+          <table className="w-full text-left text-sm">
+            <thead>
+              <tr className="border-b border-slate-700 text-slate-400">
+                <th className="py-3 px-2">Nom</th>
+                <th className="py-3 px-2">Parenté</th>
+                <th className="py-3 px-2">Téléphone</th>
+                <th className="py-3 px-2">Rôle</th>
+                <th className="py-3 px-2">Anniversaire</th>
+                <th className="py-3 px-2">Actions</th>
               </tr>
-            ))}
-          </tbody>
+            </thead>
 
-        </table>
+            <tbody>
+              {members.map((m) => (
+                <tr key={m.id} className="border-b border-slate-700">
+
+                  <td className="py-3 px-2">{m.name}</td>
+                  <td className="py-3 px-2">{m.lien_parente || "-"}</td>
+                  <td className="py-3 px-2">{m.phone}</td>
+                  <td className="py-3 px-2">{displayRole(m.role)}</td>
+
+                  <td className="py-3 px-2">
+                    {m.date_anniversaire
+                      ? new Date(m.date_anniversaire).toLocaleDateString("fr-FR")
+                      : "-"}
+                  </td>
+
+                  <td className="py-3 px-2 flex flex-wrap gap-2">
+                    {isAdmin && (
+                      <>
+                        <button
+                          onClick={() => startEdit(m)}
+                          className="px-3 py-1 text-xs bg-yellow-600 hover:bg-yellow-700 rounded"
+                        >
+                          Modifier
+                        </button>
+
+                        <button
+                          onClick={() => deleteMember(m.id)}
+                          className="px-3 py-1 text-xs bg-red-600 hover:bg-red-700 rounded"
+                        >
+                          Supprimer
+                        </button>
+                      </>
+                    )}
+                  </td>
+
+                </tr>
+              ))}
+            </tbody>
+
+          </table>
+        </div>
 
       </div>
 

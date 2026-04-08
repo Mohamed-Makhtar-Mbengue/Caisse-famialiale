@@ -24,30 +24,39 @@ export default function Dashboard() {
   const solde = totalContributions + totalDons - totalOut;
 
   return (
-    <div className="p-6 text-white space-y-10">
+    <div className="text-white space-y-10">
 
-      <h1 className="text-3xl font-semibold">Dashboard</h1>
+      <h1 className="text-2xl md:text-3xl font-semibold">Dashboard</h1>
 
       <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
 
-        <div className="bg-[#111827] p-6 rounded-xl border border-slate-700">
+        {/* Carte */}
+        <div className="bg-[#111827] p-4 md:p-6 rounded-xl border border-slate-700">
           <span className="text-slate-400 text-sm">Cotisations</span>
-          <div className="text-4xl font-bold mt-3">{totalContributions} GNF</div>
+          <div className="text-3xl md:text-4xl font-bold mt-3 wrap-break-word">
+            {totalContributions} GNF
+          </div>
         </div>
 
-        <div className="bg-[#111827] p-6 rounded-xl border border-slate-700">
+        <div className="bg-[#111827] p-4 md:p-6 rounded-xl border border-slate-700">
           <span className="text-slate-400 text-sm">Dons</span>
-          <div className="text-4xl font-bold mt-3">{totalDons} GNF</div>
+          <div className="text-3xl md:text-4xl font-bold mt-3 wrap-break-word">
+            {totalDons} GNF
+          </div>
         </div>
 
-        <div className="bg-[#111827] p-6 rounded-xl border border-slate-700">
+        <div className="bg-[#111827] p-4 md:p-6 rounded-xl border border-slate-700">
           <span className="text-slate-400 text-sm">Sorties</span>
-          <div className="text-4xl font-bold mt-3">{totalOut} GNF</div>
+          <div className="text-3xl md:text-4xl font-bold mt-3 wrap-break-word">
+            {totalOut} GNF
+          </div>
         </div>
 
-        <div className="bg-[#111827] p-6 rounded-xl border border-slate-700">
+        <div className="bg-[#111827] p-4 md:p-6 rounded-xl border border-slate-700">
           <span className="text-slate-400 text-sm">Solde</span>
-          <div className="text-4xl font-bold mt-3">{solde} GNF</div>
+          <div className="text-3xl md:text-4xl font-bold mt-3 wrap-break-word">
+            {solde} GNF
+          </div>
         </div>
 
       </div>
