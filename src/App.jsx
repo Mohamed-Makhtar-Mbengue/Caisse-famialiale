@@ -9,6 +9,7 @@ import Transactions from "./sections/Transactions";
 import Dashboard from "./sections/Dashboard";
 
 import Sidebar from "./components/Sidebar";
+import Footer from "./components/Footer";
 import AuthPage from "./pages/Auth";
 
 export default function App() {
@@ -101,6 +102,9 @@ export default function App() {
         <main className="px-4 md:px-8 lg:px-10 py-6 flex-1">
           {renderPage()}
         </main>
+
+        {/* FOOTER */}
+        <Footer />
 
       </div>
     </div>
