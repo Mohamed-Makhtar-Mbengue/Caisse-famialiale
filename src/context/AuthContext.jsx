@@ -9,35 +9,28 @@ export function AuthProvider({ children }) {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    const loadUser = async () => {
-      const { data } = await supabase.auth.getUser();
-      const currentUser = data?.user || null;
+    const loadSession = async () => {
+      const { data } = await supabase.auth.getSession();
+      const session = data.session;
 
-      setUser(currentUser);
+      setUser(session?.user || null);
 
-      if (currentUser) {
-        const r = currentUser.user_metadata?.role;
-        setRole(r || "user");
-      } else {
-        setRole("user");
-      }
+      const userRole = session?.user?.user_metadata?.role || "user";
+      setRole(userRole);
 
       setLoading(false);
     };
 
-    loadUser();
+    loadSession();
 
-    const { data: listener } = supabase.auth.onAuthStateChange((_event, session) => {
-      const currentUser = session?.user || null;
-      setUser(currentUser);
+    const { data: listener } = supabase.auth.onAuthStateChange(
+      (_event, session) => {
+        setUser(session?.user || null);
 
-      if (currentUser) {
-        const r = currentUser.user_metadata?.role;
-        setRole(r || "user");
-      } else {
-        setRole("user");
+        const userRole = session?.user?.user_metadata?.role || "user";
+        setRole(userRole);
       }
-    });
+    );
 
     return () => listener.subscription.unsubscribe();
   }, []);

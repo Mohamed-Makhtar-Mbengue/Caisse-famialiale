@@ -7,40 +7,63 @@ export default function Home() {
   const [totalDons, setTotalDons] = useState(0);
   const [totalOut, setTotalOut] = useState(0);
   const [lateMembers, setLateMembers] = useState([]);
+  const [loading, setLoading] = useState(true);
 
   const fetchKPIs = async () => {
-    const { count: membersCount } = await supabase
-      .from("members")
-      .select("*", { count: "exact", head: true });
-    setMembersCount(membersCount || 0);
+    try {
+      const { count: membersCount } = await supabase
+        .from("members")
+        .select("*", { count: "exact", head: true });
+      setMembersCount(membersCount || 0);
 
-    const { data: totalContrib } = await supabase.rpc("sum_contributions");
-    setTotalContributions(totalContrib || 0);
+      const { data: totalContrib } = await supabase.rpc("sum_contributions");
+      setTotalContributions(totalContrib || 0);
 
-    const { data: dons } = await supabase.rpc("sum_dons");
-    setTotalDons(dons || 0);
+      const { data: dons } = await supabase.rpc("sum_dons");
+      setTotalDons(dons || 0);
 
-    const { data: totalOut } = await supabase.rpc("sum_transactions_out");
-    setTotalOut(totalOut || 0);
+      const { data: totalOut } = await supabase.rpc("sum_transactions_out");
+      setTotalOut(totalOut || 0);
+
+    } catch (err) {
+      console.error("Erreur KPIs:", err);
+    }
   };
 
   const fetchLateMembers = async () => {
-    const { data } = await supabase.rpc("late_members");
-    setLateMembers(data || []);
+    try {
+      const { data } = await supabase.rpc("late_members");
+      setLateMembers(data || []);
+    } catch (err) {
+      console.error("Erreur late_members:", err);
+    }
   };
 
   useEffect(() => {
-    fetchKPIs();
-    fetchLateMembers();
+    const load = async () => {
+      await fetchKPIs();
+      await fetchLateMembers();
+      setLoading(false);
+    };
+    load();
   }, []);
 
   const solde = totalContributions + totalDons - totalOut;
+
+  if (loading) {
+    return (
+      <div className="text-white text-center py-10">
+        <div className="text-lg">Chargement des données...</div>
+      </div>
+    );
+  }
 
   return (
     <div className="space-y-10 p-6 rounded-xl bg-[#0A0F1F] text-white">
 
       <h1 className="text-3xl font-semibold">Bienvenue dans la Caisse Familiale</h1>
 
+      {/* KPIs */}
       <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
 
         <div className="bg-[#111827] p-6 rounded-xl border border-slate-700">
@@ -65,44 +88,49 @@ export default function Home() {
 
       </div>
 
+      {/* Solde */}
       <div className="bg-[#111827] p-6 rounded-xl border border-slate-700">
         <span className="text-slate-400 text-sm">Solde actuel</span>
         <div className="text-4xl font-bold mt-3">{solde} GNF</div>
       </div>
 
+      {/* Membres en retard */}
       <div className="bg-[#111827] p-6 rounded-xl border border-slate-700">
         <h2 className="text-lg font-semibold mb-4">🔔 Membres en retard</h2>
 
-        <table className="w-full text-left">
-          <thead>
-            <tr className="border-b border-slate-700">
-              <th className="py-3 px-2 text-slate-400">Nom</th>
-              <th className="py-3 px-2 text-slate-400">Payé</th>
-              <th className="py-3 px-2 text-slate-400">Manquant</th>
-              <th className="py-3 px-2 text-slate-400">Statut</th>
-            </tr>
-          </thead>
+        {lateMembers.length === 0 ? (
+          <div className="text-slate-400">Aucun membre en retard 🎉</div>
+        ) : (
+          <table className="w-full text-left">
+            <thead>
+              <tr className="border-b border-slate-700">
+                <th className="py-3 px-2 text-slate-400">Nom</th>
+                <th className="py-3 px-2 text-slate-400">Payé</th>
+                <th className="py-3 px-2 text-slate-400">Manquant</th>
+                <th className="py-3 px-2 text-slate-400">Statut</th>
+              </tr>
+            </thead>
 
-          <tbody>
-            {lateMembers
-              .sort((a, b) => b.missing - a.missing)
-              .map((m, i) => (
-                <tr key={i} className="border-b border-slate-700">
-                  <td className="py-3 px-2">{m.name}</td>
-                  <td className="py-3 px-2">{m.total_paid} GNF</td>
-                  <td className="py-3 px-2 text-red-400">{m.missing} GNF</td>
-                  <td className="py-3 px-2">
-                    {m.missing > 0 ? (
-                      <span className="px-2 py-1 rounded bg-red-600 text-xs">En retard</span>
-                    ) : (
-                      <span className="px-2 py-1 rounded bg-green-600 text-xs">OK</span>
-                    )}
-                  </td>
-                </tr>
-              ))}
-          </tbody>
-
-        </table>
+            <tbody>
+              {lateMembers
+                .sort((a, b) => b.missing - a.missing)
+                .map((m, i) => (
+                  <tr key={i} className="border-b border-slate-700">
+                    <td className="py-3 px-2">{m.name}</td>
+                    <td className="py-3 px-2">{m.total_paid} GNF</td>
+                    <td className="py-3 px-2 text-red-400">{m.missing} GNF</td>
+                    <td className="py-3 px-2">
+                      {m.missing > 0 ? (
+                        <span className="px-2 py-1 rounded bg-red-600 text-xs">En retard</span>
+                      ) : (
+                        <span className="px-2 py-1 rounded bg-green-600 text-xs">OK</span>
+                      )}
+                    </td>
+                  </tr>
+                ))}
+            </tbody>
+          </table>
+        )}
       </div>
 
     </div>

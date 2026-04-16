@@ -13,6 +13,34 @@ export default function Transactions() {
   const [customReason, setCustomReason] = useState("");
   const [date, setDate] = useState("");
 
+  // Admin login states
+  const [adminEmail, setAdminEmail] = useState("");
+  const [adminPassword, setAdminPassword] = useState("");
+  const [isAdmin, setIsAdmin] = useState(false);
+
+  // Connexion admin
+  const loginAdmin = async () => {
+    const { data, error } = await supabase.auth.signInWithPassword({
+      email: adminEmail,
+      password: adminPassword,
+      options: {
+        data: { role: "admin" }
+      }
+    });
+
+    if (error) {
+      alert("Identifiants incorrects");
+      return;
+    }
+
+    setIsAdmin(true);
+    alert("Connexion admin réussie");
+
+    // Vérification JWT
+    const session = await supabase.auth.getSession();
+    console.log("JWT:", session.data.session?.user?.user_metadata);
+  };
+
   // Charger les mois
   const fetchMonths = async () => {
     const { data } = await supabase.rpc("list_transaction_months");
@@ -44,6 +72,11 @@ export default function Transactions() {
   };
 
   const addOrUpdateTransaction = async () => {
+    if (!isAdmin) {
+      alert("Vous devez être admin pour effectuer cette action.");
+      return;
+    }
+
     if (!amount || !date) return;
 
     const finalReason = reason === "Autre" ? customReason : reason;
@@ -84,12 +117,22 @@ export default function Transactions() {
   };
 
   const deleteTransaction = async (id) => {
+    if (!isAdmin) {
+      alert("Vous devez être admin pour supprimer.");
+      return;
+    }
+
     await supabase.from("transactions").delete().eq("id", id);
     fetchMonths();
     if (selectedMonth) loadMonthTransactions(selectedMonth);
   };
 
   const startEdit = (t) => {
+    if (!isAdmin) {
+      alert("Vous devez être admin pour modifier.");
+      return;
+    }
+
     setEditingId(t.id);
     setType(t.type);
     setAmount(t.amount);
@@ -106,6 +149,36 @@ export default function Transactions() {
     <div className="space-y-10 text-white">
 
       <h1 className="text-2xl md:text-3xl font-semibold">Transactions</h1>
+
+      {/* Connexion Admin */}
+      {!isAdmin && (
+        <div className="bg-slate-900 p-4 rounded-lg border border-slate-700 mb-6">
+          <h2 className="text-lg font-semibold mb-3">Connexion Admin</h2>
+
+          <input
+            type="email"
+            placeholder="Email admin"
+            value={adminEmail}
+            onChange={(e) => setAdminEmail(e.target.value)}
+            className="input input-bordered bg-slate-800 border-slate-600 text-white w-full mb-3"
+          />
+
+          <input
+            type="password"
+            placeholder="Mot de passe admin"
+            value={adminPassword}
+            onChange={(e) => setAdminPassword(e.target.value)}
+            className="input input-bordered bg-slate-800 border-slate-600 text-white w-full mb-3"
+          />
+
+          <button
+            onClick={loginAdmin}
+            className="px-5 py-2 rounded-lg bg-green-600 hover:bg-green-700 transition shadow"
+          >
+            Se connecter
+          </button>
+        </div>
+      )}
 
       {/* Formulaire */}
       <div className="bg-[#111827] p-4 md:p-6 rounded-xl border border-slate-700">
