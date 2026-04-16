@@ -150,36 +150,6 @@ export default function Transactions() {
 
       <h1 className="text-2xl md:text-3xl font-semibold">Transactions</h1>
 
-      {/* Connexion Admin */}
-      {!isAdmin && (
-        <div className="bg-slate-900 p-4 rounded-lg border border-slate-700 mb-6">
-          <h2 className="text-lg font-semibold mb-3">Connexion Admin</h2>
-
-          <input
-            type="email"
-            placeholder="Email admin"
-            value={adminEmail}
-            onChange={(e) => setAdminEmail(e.target.value)}
-            className="input input-bordered bg-slate-800 border-slate-600 text-white w-full mb-3"
-          />
-
-          <input
-            type="password"
-            placeholder="Mot de passe admin"
-            value={adminPassword}
-            onChange={(e) => setAdminPassword(e.target.value)}
-            className="input input-bordered bg-slate-800 border-slate-600 text-white w-full mb-3"
-          />
-
-          <button
-            onClick={loginAdmin}
-            className="px-5 py-2 rounded-lg bg-green-600 hover:bg-green-700 transition shadow"
-          >
-            Se connecter
-          </button>
-        </div>
-      )}
-
       {/* Formulaire */}
       <div className="bg-[#111827] p-4 md:p-6 rounded-xl border border-slate-700">
 
