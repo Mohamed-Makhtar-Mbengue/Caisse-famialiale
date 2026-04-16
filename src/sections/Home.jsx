@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import { supabase } from "../supabaseClient";
+import StatusBadge from "../components/StatusBadge";
 
 export default function Home() {
   const [membersCount, setMembersCount] = useState(0);
@@ -73,17 +74,23 @@ export default function Home() {
 
         <div className="bg-[#111827] p-6 rounded-xl border border-slate-700">
           <span className="text-slate-400 text-sm">Cotisations encaissées</span>
-          <div className="text-4xl font-bold mt-3">{totalContributions} GNF</div>
+          <div className="text-4xl font-bold mt-3">
+            {totalContributions.toLocaleString()} GNF
+          </div>
         </div>
 
         <div className="bg-[#111827] p-6 rounded-xl border border-slate-700">
           <span className="text-slate-400 text-sm">Dons</span>
-          <div className="text-4xl font-bold mt-3">{totalDons} GNF</div>
+          <div className="text-4xl font-bold mt-3">
+            {totalDons.toLocaleString()} GNF
+          </div>
         </div>
 
         <div className="bg-[#111827] p-6 rounded-xl border border-slate-700">
           <span className="text-slate-400 text-sm">Sorties</span>
-          <div className="text-4xl font-bold mt-3">{totalOut} GNF</div>
+          <div className="text-4xl font-bold mt-3">
+            {totalOut.toLocaleString()} GNF
+          </div>
         </div>
 
       </div>
@@ -91,23 +98,25 @@ export default function Home() {
       {/* Solde */}
       <div className="bg-[#111827] p-6 rounded-xl border border-slate-700">
         <span className="text-slate-400 text-sm">Solde actuel</span>
-        <div className="text-4xl font-bold mt-3">{solde} GNF</div>
+        <div className="text-4xl font-bold mt-3">
+          {solde.toLocaleString()} GNF
+        </div>
       </div>
 
-      {/* Membres en retard */}
+      {/* Membres */}
       <div className="bg-[#111827] p-6 rounded-xl border border-slate-700">
-        <h2 className="text-lg font-semibold mb-4">🔔 Membres en retard</h2>
+        <h2 className="text-lg font-semibold mb-4">🔔 Suivi des cotisations</h2>
 
         {lateMembers.length === 0 ? (
           <div className="text-slate-400">Aucun membre en retard 🎉</div>
         ) : (
-          <table className="w-full text-left">
+          <table className="w-full text-left border-collapse">
             <thead>
-              <tr className="border-b border-slate-700">
-                <th className="py-3 px-2 text-slate-400">Nom</th>
-                <th className="py-3 px-2 text-slate-400">Payé</th>
-                <th className="py-3 px-2 text-slate-400">Manquant</th>
-                <th className="py-3 px-2 text-slate-400">Statut</th>
+              <tr className="border-b border-slate-700 text-slate-400 text-sm">
+                <th className="py-3 px-2 font-medium">Nom</th>
+                <th className="py-3 px-2 font-medium">Payé</th>
+                <th className="py-3 px-2 font-medium">Manquant</th>
+                <th className="py-3 px-2 font-medium">Statut</th>
               </tr>
             </thead>
 
@@ -115,16 +124,30 @@ export default function Home() {
               {lateMembers
                 .sort((a, b) => b.missing - a.missing)
                 .map((m, i) => (
-                  <tr key={i} className="border-b border-slate-700">
-                    <td className="py-3 px-2">{m.name}</td>
-                    <td className="py-3 px-2">{m.total_paid} GNF</td>
-                    <td className="py-3 px-2 text-red-400">{m.missing} GNF</td>
-                    <td className="py-3 px-2">
-                      {m.missing > 0 ? (
-                        <span className="px-2 py-1 rounded bg-red-600 text-xs">En retard</span>
-                      ) : (
-                        <span className="px-2 py-1 rounded bg-green-600 text-xs">OK</span>
-                      )}
+                  <tr
+                    key={i}
+                    className="border-b border-slate-800 hover:bg-[#1A2234] transition"
+                  >
+                    <td className="py-4 px-2 font-medium">{m.name}</td>
+
+                    <td className="py-4 px-2 text-slate-300">
+                      {m.total_paid.toLocaleString()} GNF
+                    </td>
+
+                    <td
+                      className={`py-4 px-2 font-semibold ${
+                        m.missing > 0 ? "text-red-400" : "text-green-400"
+                      }`}
+                    >
+                      {m.missing.toLocaleString()} GNF
+                    </td>
+
+                    <td className="py-4 px-2">
+                      <StatusBadge
+                        missing={m.missing}
+                        isLate={m.is_late}
+                        statusMessage={m.status_message}
+                      />
                     </td>
                   </tr>
                 ))}
