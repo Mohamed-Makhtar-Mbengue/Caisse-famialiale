@@ -31,9 +31,7 @@ export default function Contributions() {
     const { error } = await supabase.auth.signInWithPassword({
       email: adminEmail,
       password: adminPassword,
-      options: {
-        data: { role: "admin" }
-      }
+      options: { data: { role: "admin" } },
     });
 
     if (error) {
@@ -101,17 +99,25 @@ export default function Contributions() {
 
     } else {
       // Nouvelle contribution
-      const { data: contrib } = await supabase
+      const { data: contrib, error } = await supabase
         .from("contributions")
-        .insert({
-          member_id: member,
-          amount: Number(amount),
-          event_id: event || null,
-          date,
-          month_key: month,
-        })
+        .insert([
+          {
+            member_id: member,
+            amount: Number(amount),
+            event_id: event || null,
+            date,
+            month_key: month,
+          },
+        ])
         .select()
         .single();
+
+      if (error) {
+        console.error(error);
+        alert("Erreur lors de l'ajout");
+        return;
+      }
 
       // Transaction liée
       await supabase.from("transactions").insert([
@@ -143,7 +149,6 @@ export default function Contributions() {
   // Pré-remplir pour modification
   const startEdit = (c) => {
     if (!isAdmin) return alert("Accès refusé : réservé aux admins.");
-
     setEditingId(c.id);
     setMember(c.member_id);
     setAmount(c.amount);
@@ -177,10 +182,9 @@ export default function Contributions() {
 
   return (
     <div className="space-y-10 text-white">
-
       <h1 className="text-3xl font-semibold">Cotisations & Événements</h1>
 
-      {/* 🔐 Connexion Admin */}
+      {/* 🔒 Connexion Admin */}
       {!isAdmin && (
         <div className="bg-slate-900 p-4 rounded-lg border border-slate-700 mb-6">
           <h2 className="text-lg font-semibold mb-3">Connexion Admin</h2>
@@ -213,13 +217,11 @@ export default function Contributions() {
       {/* Formulaire cotisation */}
       {isAdmin && (
         <div className="bg-[#111827] p-6 rounded-xl border border-slate-700">
-
           <h2 className="text-lg font-semibold mb-4">
             {editingId ? "Modifier la cotisation" : "Ajouter une cotisation"}
           </h2>
 
           <div className="grid grid-cols-1 md:grid-cols-5 gap-4">
-
             <select
               value={member}
               onChange={(e) => setMember(e.target.value)}
@@ -269,7 +271,6 @@ export default function Contributions() {
             >
               +
             </button>
-
           </div>
 
           <div className="mt-4 flex gap-3">
@@ -298,7 +299,6 @@ export default function Contributions() {
 
         {months.map((m) => (
           <div key={m.month_key} className="mb-4">
-
             <button
               onClick={() => {
                 setSelectedMonth(m.month_key);
@@ -312,7 +312,6 @@ export default function Contributions() {
                   year: "numeric",
                 })}
               </span>
-              <span className="text-slate-400 ml-2">{m.total} cotisations</span>
             </button>
 
             {selectedMonth === m.month_key && (
@@ -326,7 +325,7 @@ export default function Contributions() {
                       className="text-slate-300 flex justify-between items-center"
                     >
                       <span>
-                        {c.member_name} — {c.amount} GNF
+                        {c.member_name} - {c.amount} GNF
                         {c.event_name && (
                           <span className="text-blue-400 ml-2">
                             (Événement : {c.event_name})
@@ -356,7 +355,6 @@ export default function Contributions() {
                 </ul>
               </div>
             )}
-
           </div>
         ))}
       </div>
@@ -400,7 +398,6 @@ export default function Contributions() {
           </div>
         </div>
       )}
-
     </div>
   );
 }

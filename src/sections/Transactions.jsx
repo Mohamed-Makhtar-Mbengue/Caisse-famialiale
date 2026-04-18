@@ -1,7 +1,11 @@
 import { useEffect, useState } from "react";
 import { supabase } from "../supabaseClient";
+import { useAuth } from "../context/AuthContext";
 
 export default function Transactions() {
+  const { role } = useAuth();
+  const isAdmin = role === "admin";
+
   const [months, setMonths] = useState([]);
   const [selectedMonth, setSelectedMonth] = useState(null);
   const [transactions, setTransactions] = useState([]);
@@ -16,16 +20,13 @@ export default function Transactions() {
   // Admin login states
   const [adminEmail, setAdminEmail] = useState("");
   const [adminPassword, setAdminPassword] = useState("");
-  const [isAdmin, setIsAdmin] = useState(false);
 
   // Connexion admin
   const loginAdmin = async () => {
-    const { data, error } = await supabase.auth.signInWithPassword({
+    const { error } = await supabase.auth.signInWithPassword({
       email: adminEmail,
       password: adminPassword,
-      options: {
-        data: { role: "admin" }
-      }
+      options: { data: { role: "admin" } }
     });
 
     if (error) {
@@ -33,12 +34,11 @@ export default function Transactions() {
       return;
     }
 
-    setIsAdmin(true);
-    alert("Connexion admin réussie");
+    // 🔥 Recharge la session pour mettre à jour le rôle dans AuthContext
+    const { data: refreshed } = await supabase.auth.getSession();
+    console.log("JWT:", refreshed.session?.user?.user_metadata);
 
-    // Vérification JWT
-    const session = await supabase.auth.getSession();
-    console.log("JWT:", session.data.session?.user?.user_metadata);
+    alert("Connexion admin réussie");
   };
 
   // Charger les mois
@@ -150,83 +150,115 @@ export default function Transactions() {
 
       <h1 className="text-2xl md:text-3xl font-semibold">Transactions</h1>
 
-      {/* Formulaire */}
-      <div className="bg-[#111827] p-4 md:p-6 rounded-xl border border-slate-700">
-
-        <h2 className="text-lg font-semibold mb-4">
-          {editingId ? "Modifier la transaction" : "Ajouter une transaction"}
-        </h2>
-
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-
-          <select
-            value={type}
-            onChange={(e) => setType(e.target.value)}
-            className="select select-bordered bg-slate-800 border-slate-600 text-white w-full"
-          >
-            <option value="Entrée">Entrée</option>
-            <option value="Sortie">Sortie</option>
-          </select>
+      {/* 🔒 Connexion Admin */}
+      {!isAdmin && (
+        <div className="bg-slate-900 p-4 rounded-lg border border-slate-700 mb-6">
+          <h2 className="text-lg font-semibold mb-3">Connexion Admin</h2>
 
           <input
-            type="number"
-            placeholder="Montant"
-            value={amount}
-            onChange={(e) => setAmount(e.target.value)}
-            className="input input-bordered bg-slate-800 border-slate-600 text-white w-full"
+            type="email"
+            placeholder="Email admin"
+            value={adminEmail}
+            onChange={(e) => setAdminEmail(e.target.value)}
+            className="input input-bordered bg-slate-800 border-slate-600 text-white w-full mb-3"
           />
 
-          <div>
+          <input
+            type="password"
+            placeholder="Mot de passe admin"
+            value={adminPassword}
+            onChange={(e) => setAdminPassword(e.target.value)}
+            className="input input-bordered bg-slate-800 border-slate-600 text-white w-full mb-3"
+          />
+
+          <button
+            onClick={loginAdmin}
+            className="px-5 py-2 rounded-lg bg-green-600 hover:bg-green-700 transition shadow"
+          >
+            Se connecter
+          </button>
+        </div>
+      )}
+
+      {/* Formulaire */}
+      {isAdmin && (
+        <div className="bg-[#111827] p-4 md:p-6 rounded-xl border border-slate-700">
+
+          <h2 className="text-lg font-semibold mb-4">
+            {editingId ? "Modifier la transaction" : "Ajouter une transaction"}
+          </h2>
+
+          <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+
             <select
-              value={reason}
-              onChange={(e) => setReason(e.target.value)}
+              value={type}
+              onChange={(e) => setType(e.target.value)}
               className="select select-bordered bg-slate-800 border-slate-600 text-white w-full"
             >
-              <option value="">Choisir un motif</option>
-              <option value="Don">Don</option>
-              <option value="Emprunt">Emprunt</option>
-              <option value="Cotisation">Cotisation</option>
-              <option value="Autre">Autre…</option>
+              <option value="Entrée">Entrée</option>
+              <option value="Sortie">Sortie</option>
             </select>
 
-            {reason === "Autre" && (
-              <input
-                type="text"
-                placeholder="Motif personnalisé"
-                value={customReason}
-                onChange={(e) => setCustomReason(e.target.value)}
-                className="input input-bordered bg-slate-800 border-slate-600 text-white w-full mt-2"
-              />
-            )}
+            <input
+              type="number"
+              placeholder="Montant"
+              value={amount}
+              onChange={(e) => setAmount(e.target.value)}
+              className="input input-bordered bg-slate-800 border-slate-600 text-white w-full"
+            />
+
+            <div>
+              <select
+                value={reason}
+                onChange={(e) => setReason(e.target.value)}
+                className="select select-bordered bg-slate-800 border-slate-600 text-white w-full"
+              >
+                <option value="">Choisir un motif</option>
+                <option value="Don">Don</option>
+                <option value="Emprunt">Emprunt</option>
+                <option value="Cotisation">Cotisation</option>
+                <option value="Autre">Autre…</option>
+              </select>
+
+              {reason === "Autre" && (
+                <input
+                  type="text"
+                  placeholder="Motif personnalisé"
+                  value={customReason}
+                  onChange={(e) => setCustomReason(e.target.value)}
+                  className="input input-bordered bg-slate-800 border-slate-600 text-white w-full mt-2"
+                />
+              )}
+            </div>
+
+            <input
+              type="date"
+              value={date}
+              onChange={(e) => setDate(e.target.value)}
+              className="input input-bordered bg-slate-800 border-slate-600 text-white w-full"
+            />
+
           </div>
 
-          <input
-            type="date"
-            value={date}
-            onChange={(e) => setDate(e.target.value)}
-            className="input input-bordered bg-slate-800 border-slate-600 text-white w-full"
-          />
-
-        </div>
-
-        <div className="mt-4 flex flex-wrap gap-3">
-          <button
-            onClick={addOrUpdateTransaction}
-            className="px-5 py-2 rounded-lg bg-blue-600 hover:bg-blue-700 transition shadow"
-          >
-            {editingId ? "Mettre à jour" : "Ajouter"}
-          </button>
-
-          {editingId && (
+          <div className="mt-4 flex flex-wrap gap-3">
             <button
-              onClick={resetForm}
-              className="px-5 py-2 rounded-lg bg-gray-600 hover:bg-gray-700 transition shadow"
+              onClick={addOrUpdateTransaction}
+              className="px-5 py-2 rounded-lg bg-blue-600 hover:bg-blue-700 transition shadow"
             >
-              Annuler
+              {editingId ? "Mettre à jour" : "Ajouter"}
             </button>
-          )}
+
+            {editingId && (
+              <button
+                onClick={resetForm}
+                className="px-5 py-2 rounded-lg bg-gray-600 hover:bg-gray-700 transition shadow"
+              >
+                Annuler
+              </button>
+            )}
+          </div>
         </div>
-      </div>
+      )}
 
       {/* LISTE REGROUPÉE PAR MOIS */}
       <div className="bg-[#111827] p-4 md:p-6 rounded-xl border border-slate-700">
@@ -267,21 +299,23 @@ export default function Transactions() {
                         <span className="text-blue-400 ml-2">({t.reason})</span>
                       </div>
 
-                      <div className="flex gap-2 mt-2 md:mt-0">
-                        <button
-                          onClick={() => startEdit(t)}
-                          className="px-3 py-1 text-xs bg-yellow-600 hover:bg-yellow-700 rounded"
-                        >
-                          Modifier
-                        </button>
+                      {isAdmin && (
+                        <div className="flex gap-2 mt-2 md:mt-0">
+                          <button
+                            onClick={() => startEdit(t)}
+                            className="px-3 py-1 text-xs bg-yellow-600 hover:bg-yellow-700 rounded"
+                          >
+                            Modifier
+                          </button>
 
-                        <button
-                          onClick={() => deleteTransaction(t.id)}
-                          className="px-3 py-1 text-xs bg-red-600 hover:bg-red-700 rounded"
-                        >
-                          Supprimer
-                        </button>
-                      </div>
+                          <button
+                            onClick={() => deleteTransaction(t.id)}
+                            className="px-3 py-1 text-xs bg-red-600 hover:bg-red-700 rounded"
+                          >
+                            Supprimer
+                          </button>
+                        </div>
+                      )}
 
                     </li>
                   ))}
