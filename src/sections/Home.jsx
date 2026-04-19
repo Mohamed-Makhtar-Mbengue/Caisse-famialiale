@@ -4,6 +4,7 @@ import StatusBadge from "../components/StatusBadge";
 
 export default function Home() {
   const [membersCount, setMembersCount] = useState(0);
+  const [solde, setSolde] = useState(0);
   const [totalContributions, setTotalContributions] = useState(0);
   const [totalDons, setTotalDons] = useState(0);
   const [totalOut, setTotalOut] = useState(0);
@@ -16,6 +17,9 @@ export default function Home() {
         .from("members")
         .select("*", { count: "exact", head: true });
       setMembersCount(membersCount || 0);
+
+      const { data: soldeData } = await supabase.rpc("solde_global");
+      setSolde(soldeData || 0);
 
       const { data: totalContrib } = await supabase.rpc("sum_contributions");
       setTotalContributions(totalContrib || 0);
@@ -48,8 +52,6 @@ export default function Home() {
     };
     load();
   }, []);
-
-  const solde = totalContributions + totalDons - totalOut;
 
   if (loading) {
     return (

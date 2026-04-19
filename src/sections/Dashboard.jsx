@@ -5,21 +5,22 @@ export default function Dashboard() {
   const [totalContributions, setTotalContributions] = useState(0);
   const [totalDons, setTotalDons] = useState(0);
   const [totalOut, setTotalOut] = useState(0);
+  const [solde, setSolde] = useState(0);
   const [loading, setLoading] = useState(true);
 
   const fetchData = async () => {
     try {
-      const { data: totalContrib, error: err1 } = await supabase.rpc("sum_contributions");
-      if (err1) console.error("Erreur sum_contributions:", err1);
+      const { data: totalContrib } = await supabase.rpc("sum_contributions");
       setTotalContributions(totalContrib || 0);
 
-      const { data: dons, error: err2 } = await supabase.rpc("sum_dons");
-      if (err2) console.error("Erreur sum_dons:", err2);
+      const { data: dons } = await supabase.rpc("sum_dons");
       setTotalDons(dons || 0);
 
-      const { data: totalOut, error: err3 } = await supabase.rpc("sum_transactions_out");
-      if (err3) console.error("Erreur sum_transactions_out:", err3);
+      const { data: totalOut } = await supabase.rpc("sum_transactions_out");
       setTotalOut(totalOut || 0);
+
+      const { data: soldeData } = await supabase.rpc("solde_global");
+      setSolde(soldeData || 0);
 
     } finally {
       setLoading(false);
@@ -29,8 +30,6 @@ export default function Dashboard() {
   useEffect(() => {
     fetchData();
   }, []);
-
-  const solde = totalContributions + totalDons - totalOut;
 
   if (loading) {
     return (
@@ -50,32 +49,32 @@ export default function Dashboard() {
         {/* Cotisations */}
         <div className="bg-[#111827] p-4 md:p-6 rounded-xl border border-slate-700">
           <span className="text-slate-400 text-sm">Cotisations</span>
-          <div className="text-3xl md:text-4xl font-bold mt-3 break-words">
-            {totalContributions} GNF
+          <div className="text-3xl md:text-4xl font-bold mt-3 wrap-break-word">
+            {totalContributions.toLocaleString()} GNF
           </div>
         </div>
 
         {/* Dons */}
         <div className="bg-[#111827] p-4 md:p-6 rounded-xl border border-slate-700">
           <span className="text-slate-400 text-sm">Dons</span>
-          <div className="text-3xl md:text-4xl font-bold mt-3 break-words">
-            {totalDons} GNF
+          <div className="text-3xl md:text-4xl font-bold mt-3 wrap-break-word">
+            {totalDons.toLocaleString()} GNF
           </div>
         </div>
 
         {/* Sorties */}
         <div className="bg-[#111827] p-4 md:p-6 rounded-xl border border-slate-700">
           <span className="text-slate-400 text-sm">Sorties</span>
-          <div className="text-3xl md:text-4xl font-bold mt-3 break-words">
-            {totalOut} GNF
+          <div className="text-3xl md:text-4xl font-bold mt-3 wrap-break-word">
+            {totalOut.toLocaleString()} GNF
           </div>
         </div>
 
         {/* Solde */}
         <div className="bg-[#111827] p-4 md:p-6 rounded-xl border border-slate-700">
           <span className="text-slate-400 text-sm">Solde</span>
-          <div className="text-3xl md:text-4xl font-bold mt-3 break-words">
-            {solde} GNF
+          <div className="text-3xl md:text-4xl font-bold mt-3 wrap-break-word">
+            {solde.toLocaleString()} GNF
           </div>
         </div>
 
